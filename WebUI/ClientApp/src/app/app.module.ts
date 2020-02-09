@@ -13,7 +13,7 @@ import { NavMenuComponent } from "./nav-menu/nav-menu.component";
 import { HomeComponent } from "./home/home.component";
 import { CounterComponent } from "./counter/counter.component";
 import { FetchDataComponent } from "./fetch-data/fetch-data.component";
-import { EmployeeService } from "./api-generated";
+import { EmployeeService, API_BASE_URL } from "./api-generated";
 import { ProductenService } from "./api-generated";
 import { KeukenComponent } from "./keuken/keuken.component";
 import { KitchenOrdersService } from "./api-generated";
@@ -41,6 +41,7 @@ import { KitchenOrdersService } from "./api-generated";
   providers: [
     EmployeeService,
     HttpClient,
+    { provide: API_BASE_URL, useValue: "" },
     ProductenService,
     KitchenOrdersService
   ],

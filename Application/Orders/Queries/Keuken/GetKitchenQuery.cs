@@ -1,21 +1,21 @@
-﻿using Application.Common.Interfaces;
-using AutoMapper;
-using Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Common.Interfaces;
+using AutoMapper;
+using Domain.Entities;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
-namespace Application.Orders.Queries
+namespace Application.Orders.Queries.Keuken
 {
-    public class GetKitchenQuery : IRequest<List<KitchenOrderVm>>
+    public class GetKitchenQuery : IRequest<List<KitchenVm>>
     {
-
-
-        public class GetKitchenQueryHandler : IRequestHandler<GetKitchenQuery, List<KitchenOrderVm>>
+        public class GetKitchenQueryHandler : IRequestHandler<GetKitchenQuery, List<KitchenVm>>
         {
             private readonly IApplicationDbContext _context;
             private readonly IMapper _mapper;
@@ -25,38 +25,55 @@ namespace Application.Orders.Queries
                 _mapper = mapper;
                 _context = context;
             }
-            public async Task<List<KitchenOrderVm>> Handle(GetKitchenQuery request, CancellationToken cancellationToken)
+            public async Task<List<KitchenVm>> Handle(GetKitchenQuery request, CancellationToken cancellationToken)
             {
                 var alleOrders = 
                     await _context.Bestellingen
+                        .Where(x => x.KeukenAfgerond == false)
                         .Include(x => x.BesteldeProducten)
                         .ThenInclude(x => x.Product)
                         .ToListAsync(cancellationToken);
-
                 var orders = FilterOrdersMetBurgers(alleOrders);
-                var displayAllBurgers = FilterAlleenBurgersPerOrder(orders);
-                return displayAllBurgers;
+                var burgersPerOrder = FilterAlleenBurgersPerOrder(orders);
+
+                return burgersPerOrder;
             }
 
             // Methods
-            private List<KitchenOrderVm> FilterAlleenBurgersPerOrder(List<Order> orders)
+            private List<KitchenVm> FilterAlleenBurgersPerOrder(List<Order> orders)
             {
-                var result = new List<KitchenOrderVm>();
+  
+                var result = new List<KitchenVm>();
+
+                // Juiste hoeveelheid keukenbestellingen maken
                 for (int i = 0; i <= orders.Count - 1; i++)
                 {
-                    result.Add(new KitchenOrderVm());
+                    result.Add(new KitchenVm());
+
+       
+
                     for (int j = 0; j <= orders[i].BesteldeProducten.Count - 1; j++)
                     {
-                        result[i].Burgers.Add(orders[i].BesteldeProducten[j].Product.ProductName);
+                        result[i].OrderId = orders[i].OrderId;
+
+                        var bestelling = orders[i].BesteldeProducten;
+                        result[i].Bestelling = bestelling
+                            .GroupBy(g => new Tuple<string, int>(g.Product.ProductName, g.Hoeveelheid))
+                            .Select(x => new BurgerDto()
+                            {
+                                Name = x.Key.Item1,
+                                Amount = x.Key.Item2,
+                            })
+                            .ToList();
                     }
                 }
 
                 return result;
             }
-            private List<Order> FilterOrdersMetBurgers(List<Order> allorders)
+            private List<Order> FilterOrdersMetBurgers(List<Order> alleorders)
             {
                 var result = new List<Order>();
-                foreach (var order in allorders)
+                foreach (var order in alleorders)
                 {
                     foreach (var besteldProduct in order.BesteldeProducten)
                     {
@@ -73,6 +90,7 @@ namespace Application.Orders.Queries
                 }
                 return result;
             }
+
         }
     }
 }

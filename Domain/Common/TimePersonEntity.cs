@@ -7,8 +7,10 @@ using Domain.Enum;
 
 namespace Domain.Common
 {
-    public class CashierEntity
+    public class OrderEntity
     {
         public Employee Employee { get; set; }
+
+
     }
 }

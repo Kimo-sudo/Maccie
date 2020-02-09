@@ -195,7 +195,8 @@ export class EmployeeService implements IEmployeeService {
 }
 
 export interface IKitchenOrdersService {
-    get(): Observable<KitchenOrderVm[]>;
+    get(): Observable<KitchenVm[]>;
+    update(id: number, command: KeukenServedCommand): Observable<FileResponse | null>;
 }
 
 @Injectable()
@@ -209,7 +210,7 @@ export class KitchenOrdersService implements IKitchenOrdersService {
         this.baseUrl = baseUrl ? baseUrl : "https://localhost:44344";
     }
 
-    get(): Observable<KitchenOrderVm[]> {
+    get(): Observable<KitchenVm[]> {
         let url_ = this.baseUrl + "/api/KitchenOrders";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -228,14 +229,14 @@ export class KitchenOrdersService implements IKitchenOrdersService {
                 try {
                     return this.processGet(<any>response_);
                 } catch (e) {
-                    return <Observable<KitchenOrderVm[]>><any>_observableThrow(e);
+                    return <Observable<KitchenVm[]>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<KitchenOrderVm[]>><any>_observableThrow(response_);
+                return <Observable<KitchenVm[]>><any>_observableThrow(response_);
         }));
     }
 
-    protected processGet(response: HttpResponseBase): Observable<KitchenOrderVm[]> {
+    protected processGet(response: HttpResponseBase): Observable<KitchenVm[]> {
         const status = response.status;
         const responseBlob = 
             response instanceof HttpResponse ? response.body : 
@@ -249,7 +250,7 @@ export class KitchenOrdersService implements IKitchenOrdersService {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(KitchenOrderVm.fromJS(item));
+                    result200!.push(KitchenVm.fromJS(item));
             }
             return _observableOf(result200);
             }));
@@ -258,7 +259,60 @@ export class KitchenOrdersService implements IKitchenOrdersService {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<KitchenOrderVm[]>(<any>null);
+        return _observableOf<KitchenVm[]>(<any>null);
+    }
+
+    update(id: number, command: KeukenServedCommand): Observable<FileResponse | null> {
+        let url_ = this.baseUrl + "/api/KitchenOrders/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id)); 
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",			
+            headers: new HttpHeaders({
+                "Content-Type": "application/json", 
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdate(<any>response_);
+                } catch (e) {
+                    return <Observable<FileResponse | null>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FileResponse | null>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processUpdate(response: HttpResponseBase): Observable<FileResponse | null> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: <any>responseBlob, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FileResponse | null>(<any>null);
     }
 }
 
@@ -559,11 +613,12 @@ export interface ICreateEmployeeCommand {
     phoneNumber: number;
 }
 
-export class KitchenOrderVm implements IKitchenOrderVm {
-    burgers?: string[] | undefined;
-    gemaakt!: boolean;
+export class KitchenVm implements IKitchenVm {
+    orderId!: number;
+    bestelling?: BurgerDto[] | undefined;
+    done!: boolean;
 
-    constructor(data?: IKitchenOrderVm) {
+    constructor(data?: IKitchenVm) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -574,37 +629,116 @@ export class KitchenOrderVm implements IKitchenOrderVm {
 
     init(_data?: any) {
         if (_data) {
-            if (Array.isArray(_data["burgers"])) {
-                this.burgers = [] as any;
-                for (let item of _data["burgers"])
-                    this.burgers!.push(item);
+            this.orderId = _data["orderId"];
+            if (Array.isArray(_data["bestelling"])) {
+                this.bestelling = [] as any;
+                for (let item of _data["bestelling"])
+                    this.bestelling!.push(BurgerDto.fromJS(item));
             }
-            this.gemaakt = _data["gemaakt"];
+            this.done = _data["done"];
         }
     }
 
-    static fromJS(data: any): KitchenOrderVm {
+    static fromJS(data: any): KitchenVm {
         data = typeof data === 'object' ? data : {};
-        let result = new KitchenOrderVm();
+        let result = new KitchenVm();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.burgers)) {
-            data["burgers"] = [];
-            for (let item of this.burgers)
-                data["burgers"].push(item);
+        data["orderId"] = this.orderId;
+        if (Array.isArray(this.bestelling)) {
+            data["bestelling"] = [];
+            for (let item of this.bestelling)
+                data["bestelling"].push(item.toJSON());
         }
-        data["gemaakt"] = this.gemaakt;
+        data["done"] = this.done;
         return data; 
     }
 }
 
-export interface IKitchenOrderVm {
-    burgers?: string[] | undefined;
-    gemaakt: boolean;
+export interface IKitchenVm {
+    orderId: number;
+    bestelling?: BurgerDto[] | undefined;
+    done: boolean;
+}
+
+export class BurgerDto implements IBurgerDto {
+    name?: string | undefined;
+    amount!: number;
+
+    constructor(data?: IBurgerDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): BurgerDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BurgerDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["amount"] = this.amount;
+        return data; 
+    }
+}
+
+export interface IBurgerDto {
+    name?: string | undefined;
+    amount: number;
+}
+
+export class KeukenServedCommand implements IKeukenServedCommand {
+    id!: number;
+
+    constructor(data?: IKeukenServedCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): KeukenServedCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new KeukenServedCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        return data; 
+    }
+}
+
+export interface IKeukenServedCommand {
+    id: number;
 }
 
 export class Product implements IProduct {
@@ -709,6 +843,13 @@ export interface ICreateProductCommand {
     prijs: number;
     productName?: string | undefined;
     actief: boolean;
+}
+
+export interface FileResponse {
+    data: Blob;
+    status: number;
+    fileName?: string;
+    headers?: { [name: string]: any };
 }
 
 export class ApiException extends Error {

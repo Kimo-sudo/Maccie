@@ -1,13 +1,36 @@
-<div *ngFor="let bestelling of bestellingen">
-  <div class="card" style="width: 18rem; margin: 5px; border: 5px solid black;">
-    <ul class="list-group list-group-flush">
-      <tr *ngFor="let burger of bestelling.burgers">
-        <div class="container">
-          <hr />
-          {{ burger }}
-          <hr />
-        </div>
-      </tr>
-    </ul>
+<h6>Keuken</h6>
+<div class="row">
+  <div
+    class="col col-4"
+    *ngIf="bestellingen[0]"
+    (click)="BestellingGemaakt(bestellingen[0])"
+  >
+    <p>Order nummer : {{ bestellingen[0].orderId }}</p>
+    <hr />
+    <p *ngFor="let burger of bestellingen[0].bestelling">
+      {{ burger.amount }} {{ burger.name }}
+    </p>
+  </div>
+  <div
+    class="col col-4"
+    *ngIf="bestellingen[1]"
+    (click)="BestellingGemaakt(bestellingen[1])"
+  >
+    <p>Order nummer : {{ bestellingen[1].orderId }}</p>
+    <hr />
+    <p *ngFor="let burger of bestellingen[1].bestelling">
+      {{ burger.amount }} {{ burger.name }}
+    </p>
+  </div>
+  <div
+    class="col col-4"
+    *ngIf="bestellingen[2]"
+    (click)="BestellingGemaakt(bestellingen[2])"
+  >
+    <p>Order nummer : {{ bestellingen[2].orderId }}</p>
+    <hr />
+    <p *ngFor="let burger of bestellingen[2].bestelling">
+      {{ burger.amount }} {{ burger.name }}
+    </p>
   </div>
 </div>

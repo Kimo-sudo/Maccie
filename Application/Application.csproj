@@ -25,9 +25,8 @@
 
   <ItemGroup>
     <Folder Include="Categories\" />
-    <Folder Include="NewFolder\" />
-    <Folder Include="Orders\Commands\" />
-    <Folder Include="Orders\Queries\NewFolder\" />
+    <Folder Include="Orders\Queries\Drankjes\" />
+    <Folder Include="Orders\Queries\Friet\" />
   </ItemGroup>
 
 </Project>
