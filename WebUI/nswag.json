@@ -1,0 +1,12 @@
+﻿{
+  "runtime": "NetCore21",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "json": "{\r\n  \"x-generator\": \"NSwag v13.2.2.0 (NJsonSchema v10.1.4.0 (Newtonsoft.Json v12.0.0.0))\",\r\n  \"swagger\": \"2.0\",\r\n  \"info\": {\r\n    \"title\": \"My Title\",\r\n    \"version\": \"1.0.0\"\r\n  },\r\n  \"host\": \"localhost:44344\",\r\n  \"schemes\": [\r\n    \"https\"\r\n  ],\r\n  \"produces\": [\r\n    \"text/plain\",\r\n    \"application/json\",\r\n    \"text/json\"\r\n  ],\r\n  \"paths\": {\r\n    \"/api/Employee\": {\r\n      \"get\": {\r\n        \"tags\": [\r\n          \"Employee\"\r\n        ],\r\n        \"operationId\": \"Employee_GetAllEmployees\",\r\n        \"responses\": {\r\n          \"200\": {\r\n            \"x-nullable\": false,\r\n            \"description\": \"\",\r\n            \"schema\": {\r\n              \"type\": \"array\",\r\n              \"items\": {\r\n                \"$ref\": \"#/definitions/Employee\"\r\n              }\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"definitions\": {\r\n    \"Employee\": {\r\n      \"type\": \"object\",\r\n      \"required\": [\r\n        \"employeeId\",\r\n        \"phoneNumber\"\r\n      ],\r\n      \"properties\": {\r\n        \"employeeId\": {\r\n          \"type\": \"integer\",\r\n          \"format\": \"int32\"\r\n        },\r\n        \"firstName\": {\r\n          \"type\": \"string\"\r\n        },\r\n        \"lastName\": {\r\n          \"type\": \"string\"\r\n        },\r\n        \"phoneNumber\": {\r\n          \"type\": \"integer\",\r\n          \"format\": \"int32\"\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+      "url": "https://localhost:44344/swagger/v1/swagger.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {}
+}

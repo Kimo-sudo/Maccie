@@ -1,0 +1,13 @@
+<div *ngFor="let bestelling of bestellingen">
+  <div class="card" style="width: 18rem; margin: 5px; border: 5px solid black;">
+    <ul class="list-group list-group-flush">
+      <tr *ngFor="let burger of bestelling.burgers">
+        <div class="container">
+          <hr />
+          {{ burger }}
+          <hr />
+        </div>
+      </tr>
+    </ul>
+  </div>
+</div>

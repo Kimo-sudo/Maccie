@@ -1,0 +1,49 @@
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>Voornaam</th>
+        <th>Achternaam</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let werknemer of werknemers" style="cursor: pointer;">
+        <td>{{ werknemer.firstName }}</td>
+        <td>{{ werknemer.lastName }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>Actief</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of producten">
+        <div *ngIf="product.actief">
+          <td>{{ product.productName }}</td>
+        </div>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<hr />
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>Niet actief</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of producten">
+        <div *ngIf="product.actief == false">
+          <td>{{ product.productName }}</td>
+        </div>
+      </tr>
+    </tbody>
+  </table>
+</div>
