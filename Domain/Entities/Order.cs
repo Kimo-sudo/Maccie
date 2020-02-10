@@ -8,15 +8,13 @@ namespace Domain.Entities
     {
         public Order()
         {
-            BesteldeProducten = new List<BesteldProduct>();
+            Producten = new List<BesteldProduct>();
         }
         public int OrderId { get; set; }
         public DateTime OrderDateTime { get; set; }
-        public List<BesteldProduct> BesteldeProducten { get; private set; }
+        public List<BesteldProduct> Producten { get; set; }
         public bool Afgerond { get; set; }
         public bool KeukenAfgerond { get; set; }
         public bool DrankjesAfgerond { get; set; }
-        public bool FrietAfgerond { get; set; }
-
     }
 }

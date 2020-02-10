@@ -14,6 +14,127 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
+export interface IBestellingenService {
+    getAll(): Observable<Order[]>;
+    post(command: AddBestellingCommand): Observable<Unit>;
+}
+
+@Injectable()
+export class BestellingenService implements IBestellingenService {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ? baseUrl : "https://localhost:44344";
+    }
+
+    getAll(): Observable<Order[]> {
+        let url_ = this.baseUrl + "/api/Bestellingen";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",			
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(<any>response_);
+                } catch (e) {
+                    return <Observable<Order[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<Order[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<Order[]> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(Order.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<Order[]>(<any>null);
+    }
+
+    post(command: AddBestellingCommand): Observable<Unit> {
+        let url_ = this.baseUrl + "/api/Bestellingen";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",			
+            headers: new HttpHeaders({
+                "Content-Type": "application/json", 
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processPost(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processPost(<any>response_);
+                } catch (e) {
+                    return <Observable<Unit>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<Unit>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processPost(response: HttpResponseBase): Observable<Unit> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Unit.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<Unit>(<any>null);
+    }
+}
+
 export interface IEmployeeService {
     getAllEmployees(): Observable<Employee[]>;
     createEmployee(command: CreateEmployeeCommand): Observable<number>;
@@ -195,7 +316,7 @@ export class EmployeeService implements IEmployeeService {
 }
 
 export interface IKitchenOrdersService {
-    get(): Observable<KitchenVm[]>;
+    get(): Observable<KeukenVm[]>;
     update(id: number, command: KeukenServedCommand): Observable<FileResponse | null>;
 }
 
@@ -210,7 +331,7 @@ export class KitchenOrdersService implements IKitchenOrdersService {
         this.baseUrl = baseUrl ? baseUrl : "https://localhost:44344";
     }
 
-    get(): Observable<KitchenVm[]> {
+    get(): Observable<KeukenVm[]> {
         let url_ = this.baseUrl + "/api/KitchenOrders";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -229,14 +350,14 @@ export class KitchenOrdersService implements IKitchenOrdersService {
                 try {
                     return this.processGet(<any>response_);
                 } catch (e) {
-                    return <Observable<KitchenVm[]>><any>_observableThrow(e);
+                    return <Observable<KeukenVm[]>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<KitchenVm[]>><any>_observableThrow(response_);
+                return <Observable<KeukenVm[]>><any>_observableThrow(response_);
         }));
     }
 
-    protected processGet(response: HttpResponseBase): Observable<KitchenVm[]> {
+    protected processGet(response: HttpResponseBase): Observable<KeukenVm[]> {
         const status = response.status;
         const responseBlob = 
             response instanceof HttpResponse ? response.body : 
@@ -250,7 +371,7 @@ export class KitchenOrdersService implements IKitchenOrdersService {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(KitchenVm.fromJS(item));
+                    result200!.push(KeukenVm.fromJS(item));
             }
             return _observableOf(result200);
             }));
@@ -259,7 +380,7 @@ export class KitchenOrdersService implements IKitchenOrdersService {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<KitchenVm[]>(<any>null);
+        return _observableOf<KeukenVm[]>(<any>null);
     }
 
     update(id: number, command: KeukenServedCommand): Observable<FileResponse | null> {
@@ -437,6 +558,207 @@ export class ProductenService implements IProductenService {
     }
 }
 
+export class OrderEntity implements IOrderEntity {
+    employee?: Employee | undefined;
+
+    constructor(data?: IOrderEntity) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.employee = _data["employee"] ? Employee.fromJS(_data["employee"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): OrderEntity {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrderEntity();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["employee"] = this.employee ? this.employee.toJSON() : <any>undefined;
+        return data; 
+    }
+}
+
+export interface IOrderEntity {
+    employee?: Employee | undefined;
+}
+
+export class Order extends OrderEntity implements IOrder {
+    orderId!: number;
+    orderDateTime!: Date;
+    producten?: BesteldProduct[] | undefined;
+    afgerond!: boolean;
+    keukenAfgerond!: boolean;
+    drankjesAfgerond!: boolean;
+
+    constructor(data?: IOrder) {
+        super(data);
+    }
+
+    init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.orderId = _data["orderId"];
+            this.orderDateTime = _data["orderDateTime"] ? new Date(_data["orderDateTime"].toString()) : <any>undefined;
+            if (Array.isArray(_data["producten"])) {
+                this.producten = [] as any;
+                for (let item of _data["producten"])
+                    this.producten!.push(BesteldProduct.fromJS(item));
+            }
+            this.afgerond = _data["afgerond"];
+            this.keukenAfgerond = _data["keukenAfgerond"];
+            this.drankjesAfgerond = _data["drankjesAfgerond"];
+        }
+    }
+
+    static fromJS(data: any): Order {
+        data = typeof data === 'object' ? data : {};
+        let result = new Order();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["orderId"] = this.orderId;
+        data["orderDateTime"] = this.orderDateTime ? this.orderDateTime.toISOString() : <any>undefined;
+        if (Array.isArray(this.producten)) {
+            data["producten"] = [];
+            for (let item of this.producten)
+                data["producten"].push(item.toJSON());
+        }
+        data["afgerond"] = this.afgerond;
+        data["keukenAfgerond"] = this.keukenAfgerond;
+        data["drankjesAfgerond"] = this.drankjesAfgerond;
+        super.toJSON(data);
+        return data; 
+    }
+}
+
+export interface IOrder extends IOrderEntity {
+    orderId: number;
+    orderDateTime: Date;
+    producten?: BesteldProduct[] | undefined;
+    afgerond: boolean;
+    keukenAfgerond: boolean;
+    drankjesAfgerond: boolean;
+}
+
+export class BesteldProduct implements IBesteldProduct {
+    id!: number;
+    orderId!: number;
+    productId!: number;
+    product?: Product | undefined;
+    hoeveelheid!: number;
+
+    constructor(data?: IBesteldProduct) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.orderId = _data["orderId"];
+            this.productId = _data["productId"];
+            this.product = _data["product"] ? Product.fromJS(_data["product"]) : <any>undefined;
+            this.hoeveelheid = _data["hoeveelheid"];
+        }
+    }
+
+    static fromJS(data: any): BesteldProduct {
+        data = typeof data === 'object' ? data : {};
+        let result = new BesteldProduct();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["orderId"] = this.orderId;
+        data["productId"] = this.productId;
+        data["product"] = this.product ? this.product.toJSON() : <any>undefined;
+        data["hoeveelheid"] = this.hoeveelheid;
+        return data; 
+    }
+}
+
+export interface IBesteldProduct {
+    id: number;
+    orderId: number;
+    productId: number;
+    product?: Product | undefined;
+    hoeveelheid: number;
+}
+
+export class Product implements IProduct {
+    id!: number;
+    productName?: string | undefined;
+    categorieId!: number;
+    prijs!: number;
+    actief!: boolean;
+
+    constructor(data?: IProduct) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.productName = _data["productName"];
+            this.categorieId = _data["categorieId"];
+            this.prijs = _data["prijs"];
+            this.actief = _data["actief"];
+        }
+    }
+
+    static fromJS(data: any): Product {
+        data = typeof data === 'object' ? data : {};
+        let result = new Product();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["productName"] = this.productName;
+        data["categorieId"] = this.categorieId;
+        data["prijs"] = this.prijs;
+        data["actief"] = this.actief;
+        return data; 
+    }
+}
+
+export interface IProduct {
+    id: number;
+    productName?: string | undefined;
+    categorieId: number;
+    prijs: number;
+    actief: boolean;
+}
+
 export class Employee implements IEmployee {
     employeeId!: number;
     firstName?: string | undefined;
@@ -499,6 +821,124 @@ export enum EmployeeFunctie {
     RestaurantManager = 6,
     Supervisor = 7,
     Franchisee = 8,
+}
+
+export class Unit implements IUnit {
+
+    constructor(data?: IUnit) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): Unit {
+        data = typeof data === 'object' ? data : {};
+        let result = new Unit();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data; 
+    }
+}
+
+export interface IUnit {
+}
+
+export class AddBestellingCommand implements IAddBestellingCommand {
+    id!: number;
+    producten?: AddBurgerDto[] | undefined;
+
+    constructor(data?: IAddBestellingCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            if (Array.isArray(_data["producten"])) {
+                this.producten = [] as any;
+                for (let item of _data["producten"])
+                    this.producten!.push(AddBurgerDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): AddBestellingCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddBestellingCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        if (Array.isArray(this.producten)) {
+            data["producten"] = [];
+            for (let item of this.producten)
+                data["producten"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IAddBestellingCommand {
+    id: number;
+    producten?: AddBurgerDto[] | undefined;
+}
+
+export class AddBurgerDto implements IAddBurgerDto {
+    productId!: number;
+    amount!: number;
+
+    constructor(data?: IAddBurgerDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.productId = _data["productId"];
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): AddBurgerDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddBurgerDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["productId"] = this.productId;
+        data["amount"] = this.amount;
+        return data; 
+    }
+}
+
+export interface IAddBurgerDto {
+    productId: number;
+    amount: number;
 }
 
 export class ProblemDetails implements IProblemDetails {
@@ -613,12 +1053,12 @@ export interface ICreateEmployeeCommand {
     phoneNumber: number;
 }
 
-export class KitchenVm implements IKitchenVm {
+export class KeukenVm implements IKeukenVm {
     orderId!: number;
-    bestelling?: BurgerDto[] | undefined;
+    bestelling?: BurgerMetAantallenDto[] | undefined;
     done!: boolean;
 
-    constructor(data?: IKitchenVm) {
+    constructor(data?: IKeukenVm) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -633,15 +1073,15 @@ export class KitchenVm implements IKitchenVm {
             if (Array.isArray(_data["bestelling"])) {
                 this.bestelling = [] as any;
                 for (let item of _data["bestelling"])
-                    this.bestelling!.push(BurgerDto.fromJS(item));
+                    this.bestelling!.push(BurgerMetAantallenDto.fromJS(item));
             }
             this.done = _data["done"];
         }
     }
 
-    static fromJS(data: any): KitchenVm {
+    static fromJS(data: any): KeukenVm {
         data = typeof data === 'object' ? data : {};
-        let result = new KitchenVm();
+        let result = new KeukenVm();
         result.init(data);
         return result;
     }
@@ -659,17 +1099,17 @@ export class KitchenVm implements IKitchenVm {
     }
 }
 
-export interface IKitchenVm {
+export interface IKeukenVm {
     orderId: number;
-    bestelling?: BurgerDto[] | undefined;
+    bestelling?: BurgerMetAantallenDto[] | undefined;
     done: boolean;
 }
 
-export class BurgerDto implements IBurgerDto {
+export class BurgerMetAantallenDto implements IBurgerMetAantallenDto {
     name?: string | undefined;
     amount!: number;
 
-    constructor(data?: IBurgerDto) {
+    constructor(data?: IBurgerMetAantallenDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -685,9 +1125,9 @@ export class BurgerDto implements IBurgerDto {
         }
     }
 
-    static fromJS(data: any): BurgerDto {
+    static fromJS(data: any): BurgerMetAantallenDto {
         data = typeof data === 'object' ? data : {};
-        let result = new BurgerDto();
+        let result = new BurgerMetAantallenDto();
         result.init(data);
         return result;
     }
@@ -700,7 +1140,7 @@ export class BurgerDto implements IBurgerDto {
     }
 }
 
-export interface IBurgerDto {
+export interface IBurgerMetAantallenDto {
     name?: string | undefined;
     amount: number;
 }
@@ -739,58 +1179,6 @@ export class KeukenServedCommand implements IKeukenServedCommand {
 
 export interface IKeukenServedCommand {
     id: number;
-}
-
-export class Product implements IProduct {
-    id!: number;
-    productName?: string | undefined;
-    categorieId!: number;
-    prijs!: number;
-    actief!: boolean;
-
-    constructor(data?: IProduct) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.productName = _data["productName"];
-            this.categorieId = _data["categorieId"];
-            this.prijs = _data["prijs"];
-            this.actief = _data["actief"];
-        }
-    }
-
-    static fromJS(data: any): Product {
-        data = typeof data === 'object' ? data : {};
-        let result = new Product();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["productName"] = this.productName;
-        data["categorieId"] = this.categorieId;
-        data["prijs"] = this.prijs;
-        data["actief"] = this.actief;
-        return data; 
-    }
-}
-
-export interface IProduct {
-    id: number;
-    productName?: string | undefined;
-    categorieId: number;
-    prijs: number;
-    actief: boolean;
 }
 
 export class CreateProductCommand implements ICreateProductCommand {

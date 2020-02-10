@@ -2,8 +2,9 @@ import { Component, OnInit } from "@angular/core";
 import {
   KitchenOrdersService,
   KeukenServedCommand,
-  KitchenVm
+  KeukenVm
 } from "../api-generated";
+import { HomeComponent } from "../home/home.component";
 
 @Component({
   selector: "app-keuken",
@@ -11,18 +12,17 @@ import {
   styleUrls: ["./keuken.component.css"]
 })
 export class KeukenComponent implements OnInit {
-  public order: KitchenVm;
-  public bestellingen: KitchenVm[];
+  public order: KeukenVm;
+  public bestellingen: KeukenVm[];
 
   constructor(private service: KitchenOrdersService) {}
 
   ngOnInit() {
     this.service.get().subscribe(response => {
       this.bestellingen = response;
-      console.log(response);
     });
   }
-  async BestellingGemaakt(order: KitchenVm) {
+  async BestellingGemaakt(order: KeukenVm) {
     order.done = true;
     console.log(order.orderId);
     this.service
@@ -31,6 +31,7 @@ export class KeukenComponent implements OnInit {
         () => {
           this.ngOnInit();
           console.log("gelukt");
+          console.log(this.bestellingen);
         },
         error => console.log(error)
       );
