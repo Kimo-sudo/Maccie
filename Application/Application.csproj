@@ -27,6 +27,7 @@
     <Folder Include="Categories\" />
     <Folder Include="Orders\Queries\Drankjes\" />
     <Folder Include="Orders\Queries\Friet\" />
+    <Folder Include="Orders\Queries\Kassa\" />
   </ItemGroup>
 
 </Project>

@@ -23,9 +23,9 @@ namespace Tests.Application.Queries.Keuken
             [Fact]
             public async Task Handle_ReturnsCorrectListCount()
             {
-                var query = new GetKitchenQuery();
+                var query = new GetAlleKeukenBestellingenQuery();
 
-                var handler = new GetKitchenQuery.GetKitchenQueryHandler(_mapper, _context);
+                var handler = new GetAlleKeukenBestellingenQuery.GetKitchenQueryHandler(_mapper, _context);
 
                 var result = await handler.Handle(query, CancellationToken.None);
 

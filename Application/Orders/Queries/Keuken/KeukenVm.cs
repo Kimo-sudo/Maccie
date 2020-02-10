@@ -2,10 +2,10 @@
 
 namespace Application.Orders.Queries.Keuken
 {
-    public class KitchenVm
+    public class KeukenVm
     {
         public int OrderId { get; set; }
-        public List<BurgerDto> Bestelling { get; set; }
+        public List<BurgerMetAantallenDto> Bestelling { get; set; }
         public bool Done { get; set; }
     }
 }

@@ -12,9 +12,9 @@ namespace WebUI.Controllers
     {
         [HttpGet]
 
-        public async Task<ActionResult<List<KitchenVm>>> Get()
+        public async Task<ActionResult<List<KeukenVm>>> Get()
         {
-            return await Mediator.Send(new GetKitchenQuery());
+            return await Mediator.Send(new GetAlleKeukenBestellingenQuery());
         }
         
 

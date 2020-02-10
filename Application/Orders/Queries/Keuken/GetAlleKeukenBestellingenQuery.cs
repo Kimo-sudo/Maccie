@@ -13,9 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Orders.Queries.Keuken
 {
-    public class GetKitchenQuery : IRequest<List<KitchenVm>>
+    public class GetAlleKeukenBestellingenQuery : IRequest<List<KeukenVm>>
     {
-        public class GetKitchenQueryHandler : IRequestHandler<GetKitchenQuery, List<KitchenVm>>
+        public class GetKitchenQueryHandler : IRequestHandler<GetAlleKeukenBestellingenQuery, List<KeukenVm>>
         {
             private readonly IApplicationDbContext _context;
             private readonly IMapper _mapper;
@@ -25,7 +25,7 @@ namespace Application.Orders.Queries.Keuken
                 _mapper = mapper;
                 _context = context;
             }
-            public async Task<List<KitchenVm>> Handle(GetKitchenQuery request, CancellationToken cancellationToken)
+            public async Task<List<KeukenVm>> Handle(GetAlleKeukenBestellingenQuery request, CancellationToken cancellationToken)
             {
                 var alleOrders = 
                     await _context.Bestellingen
@@ -39,19 +39,17 @@ namespace Application.Orders.Queries.Keuken
                 return burgersPerOrder;
             }
 
-            // Methods
-            private List<KitchenVm> FilterAlleenBurgersPerOrder(List<Order> orders)
-            {
-  
-                var result = new List<KitchenVm>();
 
-                // Juiste hoeveelheid keukenbestellingen maken
+            // Juiste hoeveelheid keukenbestellingen maken
+            // En voeg hieraan toe de burger en hoeveel 
+            private List<KeukenVm> FilterAlleenBurgersPerOrder(List<Order> orders)
+            {
+                var result = new List<KeukenVm>();
+
+
                 for (int i = 0; i <= orders.Count - 1; i++)
                 {
-                    result.Add(new KitchenVm());
-
-       
-
+                    result.Add(new KeukenVm());
                     for (int j = 0; j <= orders[i].BesteldeProducten.Count - 1; j++)
                     {
                         result[i].OrderId = orders[i].OrderId;
@@ -59,7 +57,7 @@ namespace Application.Orders.Queries.Keuken
                         var bestelling = orders[i].BesteldeProducten;
                         result[i].Bestelling = bestelling
                             .GroupBy(g => new Tuple<string, int>(g.Product.ProductName, g.Hoeveelheid))
-                            .Select(x => new BurgerDto()
+                            .Select(x => new BurgerMetAantallenDto()
                             {
                                 Name = x.Key.Item1,
                                 Amount = x.Key.Item2,
@@ -70,6 +68,8 @@ namespace Application.Orders.Queries.Keuken
 
                 return result;
             }
+
+            // Bestelling bevat burger? 
             private List<Order> FilterOrdersMetBurgers(List<Order> alleorders)
             {
                 var result = new List<Order>();
