@@ -1,0 +1,87 @@
+<h2>Kassa</h2>
+<div *ngFor="let product of alleProducten; let i = index">
+  <div *ngIf="i % 5 == 0" class="row">
+    <div
+      class="keys numkey one-line"
+      *ngIf="i + 1 < alleProducten.length"
+      (click)="addProduct(i)"
+    >
+      {{ alleProducten[i].productName }}
+    </div>
+    <div
+      class="keys numkey one-line"
+      *ngIf="i + 1 < alleProducten.length"
+      (click)="addProduct(i + 1)"
+    >
+      {{ alleProducten[i + 1].productName }}
+    </div>
+    <div
+      class="keys numkey one-line"
+      *ngIf="i + 2 < alleProducten.length"
+      (click)="addProduct(i + 2)"
+    >
+      {{ alleProducten[i + 2].productName }}
+    </div>
+    <div
+      class="keys numkey one-line"
+      *ngIf="i + 3 < alleProducten.length"
+      (click)="addProduct(i + 3)"
+    >
+      {{ alleProducten[i + 3].productName }}
+    </div>
+    <div
+      class="keys numkey one-line"
+      *ngIf="i + 4 < alleProducten.length"
+      (click)="addProduct(i + 4)"
+    >
+      {{ alleProducten[i + 4].productName }}
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div
+    class="keys numkey one-line"
+    *ngIf="i + 5 < alleProducten.length"
+    (click)="addProduct(i)"
+  >
+    {{ alleProducten[i].productName }}
+  </div>
+  <div
+    class="keys numkey one-line"
+    *ngIf="i + 6 < alleProducten.length"
+    (click)="addProduct(i + 1)"
+  >
+    {{ alleProducten[i + 1].productName }}
+  </div>
+  <div
+    class="keys numkey one-line"
+    *ngIf="i + 7 < alleProducten.length"
+    (click)="addProduct(i + 2)"
+  >
+    {{ alleProducten[i + 2].productName }}
+  </div>
+  <div
+    class="keys numkey one-line"
+    *ngIf="i + 8 < alleProducten.length"
+    (click)="addProduct(i + 3)"
+  >
+    {{ alleProducten[i + 3].productName }}
+  </div>
+  <div
+    class="keys numkey one-line"
+    *ngIf="i + 9 < alleProducten.length"
+    (click)="addProduct(i + 4)"
+  >
+    {{ alleProducten[i + 4].productName }}
+  </div>
+</div>
+
+<div
+  class="container"
+  style="border: 2px solid black; min-height: 12rem; margin: 0.2rem;"
+>
+  <p *ngFor="let burger of NieuweBestelling">
+    {{ burger.amount }} {{ burger.productName }}
+  </p>
+</div>
+<div class="keys equalkey one-line" (click)="confirmOrder()">Afrekenen</div>

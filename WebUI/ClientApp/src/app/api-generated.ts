@@ -597,10 +597,11 @@ export interface IOrderEntity {
 export class Order extends OrderEntity implements IOrder {
     orderId!: number;
     orderDateTime!: Date;
-    producten?: BesteldProduct[] | undefined;
+    besteldeProducten?: BesteldProduct[] | undefined;
     afgerond!: boolean;
     keukenAfgerond!: boolean;
     drankjesAfgerond!: boolean;
+    frietAfgerond!: boolean;
 
     constructor(data?: IOrder) {
         super(data);
@@ -611,14 +612,15 @@ export class Order extends OrderEntity implements IOrder {
         if (_data) {
             this.orderId = _data["orderId"];
             this.orderDateTime = _data["orderDateTime"] ? new Date(_data["orderDateTime"].toString()) : <any>undefined;
-            if (Array.isArray(_data["producten"])) {
-                this.producten = [] as any;
-                for (let item of _data["producten"])
-                    this.producten!.push(BesteldProduct.fromJS(item));
+            if (Array.isArray(_data["besteldeProducten"])) {
+                this.besteldeProducten = [] as any;
+                for (let item of _data["besteldeProducten"])
+                    this.besteldeProducten!.push(BesteldProduct.fromJS(item));
             }
             this.afgerond = _data["afgerond"];
             this.keukenAfgerond = _data["keukenAfgerond"];
             this.drankjesAfgerond = _data["drankjesAfgerond"];
+            this.frietAfgerond = _data["frietAfgerond"];
         }
     }
 
@@ -633,14 +635,15 @@ export class Order extends OrderEntity implements IOrder {
         data = typeof data === 'object' ? data : {};
         data["orderId"] = this.orderId;
         data["orderDateTime"] = this.orderDateTime ? this.orderDateTime.toISOString() : <any>undefined;
-        if (Array.isArray(this.producten)) {
-            data["producten"] = [];
-            for (let item of this.producten)
-                data["producten"].push(item.toJSON());
+        if (Array.isArray(this.besteldeProducten)) {
+            data["besteldeProducten"] = [];
+            for (let item of this.besteldeProducten)
+                data["besteldeProducten"].push(item.toJSON());
         }
         data["afgerond"] = this.afgerond;
         data["keukenAfgerond"] = this.keukenAfgerond;
         data["drankjesAfgerond"] = this.drankjesAfgerond;
+        data["frietAfgerond"] = this.frietAfgerond;
         super.toJSON(data);
         return data; 
     }
@@ -649,10 +652,11 @@ export class Order extends OrderEntity implements IOrder {
 export interface IOrder extends IOrderEntity {
     orderId: number;
     orderDateTime: Date;
-    producten?: BesteldProduct[] | undefined;
+    besteldeProducten?: BesteldProduct[] | undefined;
     afgerond: boolean;
     keukenAfgerond: boolean;
     drankjesAfgerond: boolean;
+    frietAfgerond: boolean;
 }
 
 export class BesteldProduct implements IBesteldProduct {
@@ -660,6 +664,7 @@ export class BesteldProduct implements IBesteldProduct {
     orderId!: number;
     productId!: number;
     product?: Product | undefined;
+    order?: Order | undefined;
     hoeveelheid!: number;
 
     constructor(data?: IBesteldProduct) {
@@ -677,6 +682,7 @@ export class BesteldProduct implements IBesteldProduct {
             this.orderId = _data["orderId"];
             this.productId = _data["productId"];
             this.product = _data["product"] ? Product.fromJS(_data["product"]) : <any>undefined;
+            this.order = _data["order"] ? Order.fromJS(_data["order"]) : <any>undefined;
             this.hoeveelheid = _data["hoeveelheid"];
         }
     }
@@ -694,6 +700,7 @@ export class BesteldProduct implements IBesteldProduct {
         data["orderId"] = this.orderId;
         data["productId"] = this.productId;
         data["product"] = this.product ? this.product.toJSON() : <any>undefined;
+        data["order"] = this.order ? this.order.toJSON() : <any>undefined;
         data["hoeveelheid"] = this.hoeveelheid;
         return data; 
     }
@@ -704,6 +711,7 @@ export interface IBesteldProduct {
     orderId: number;
     productId: number;
     product?: Product | undefined;
+    order?: Order | undefined;
     hoeveelheid: number;
 }
 
@@ -904,6 +912,7 @@ export interface IAddBestellingCommand {
 export class AddBurgerDto implements IAddBurgerDto {
     productId!: number;
     amount!: number;
+    productName?: string | undefined;
 
     constructor(data?: IAddBurgerDto) {
         if (data) {
@@ -918,6 +927,7 @@ export class AddBurgerDto implements IAddBurgerDto {
         if (_data) {
             this.productId = _data["productId"];
             this.amount = _data["amount"];
+            this.productName = _data["productName"];
         }
     }
 
@@ -932,6 +942,7 @@ export class AddBurgerDto implements IAddBurgerDto {
         data = typeof data === 'object' ? data : {};
         data["productId"] = this.productId;
         data["amount"] = this.amount;
+        data["productName"] = this.productName;
         return data; 
     }
 }
@@ -939,6 +950,7 @@ export class AddBurgerDto implements IAddBurgerDto {
 export interface IAddBurgerDto {
     productId: number;
     amount: number;
+    productName?: string | undefined;
 }
 
 export class ProblemDetails implements IProblemDetails {

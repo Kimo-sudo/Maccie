@@ -29,8 +29,8 @@
   >
     <p>Order nummer : {{ bestellingen[2].orderId }}</p>
     <hr />
-    <p *ngFor="let burger of bestellingen[2].bestelling">
-      {{ burger.amount }} {{ burger.name }}
-    </p>
+    <div *ngFor="let burger of bestellingen[2].bestelling">
+      <p>{{ burger.amount }} {{ burger.name }}</p>
+    </div>
   </div>
 </div>

@@ -13,7 +13,7 @@ namespace Tests.Application.Queries.Keuken
     
 
             private readonly ApplicationDbContext _context;
-            private readonly IMapper _mapper;
+     
 
             public GetKeukenQueryTest(QueryTestFixture fixture)
             {
@@ -25,7 +25,7 @@ namespace Tests.Application.Queries.Keuken
             {
                 var query = new GetAlleKeukenBestellingenQuery();
 
-                var handler = new GetAlleKeukenBestellingenQuery.GetKitchenQueryHandler(_mapper, _context);
+                var handler = new GetAlleKeukenBestellingenQuery.GetKitchenQueryHandler(_context);
 
                 var result = await handler.Handle(query, CancellationToken.None);
 

@@ -4,14 +4,16 @@ using Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infra.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200212103721_RemoveKeyFromBesteldProduct")]
+    partial class RemoveKeyFromBesteldProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,11 +23,6 @@ namespace Infra.Migrations
 
             modelBuilder.Entity("Domain.Entities.BesteldProduct", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                     b.Property<int>("Hoeveelheid")
                         .HasColumnType("int");
 
@@ -34,10 +31,6 @@ namespace Infra.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
@@ -99,9 +92,6 @@ namespace Infra.Migrations
                     b.Property<int?>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("FrietAfgerond")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("KeukenAfgerond")
                         .HasColumnType("bit");
 
@@ -147,12 +137,6 @@ namespace Infra.Migrations
 
             modelBuilder.Entity("Domain.Entities.BesteldProduct", b =>
                 {
-                    b.HasOne("Domain.Entities.Order", "order")
-                        .WithMany("BesteldeProducten")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")

@@ -27,10 +27,18 @@ namespace Application.Orders.Queries.Keuken
             {
                 var alleOrders =
                     await _context.Bestellingen
-                        .Where(order => order.KeukenAfgerond == false)
-                        .Include(order => order.Producten)
-                            .ThenInclude(besteldProduct => besteldProduct.Product)
+                        .Include(x => x.BesteldeProducten)
+                            .ThenInclude(x => x.Product)
+                        .Where(x => x.KeukenAfgerond == false)
                         .ToListAsync(cancellationToken);
+
+
+                var test =
+                    _context.Bestellingen
+                        .Where(x => x.KeukenAfgerond == false)
+                        .Include(x => x.BesteldeProducten)
+                        .ThenInclude(x => x.Product)
+                        .ToList();
                 var burgersPerOrder = FilterAlleenBurgersPerOrder(alleOrders);
                 return burgersPerOrder;
 
@@ -47,8 +55,9 @@ namespace Application.Orders.Queries.Keuken
                     result.Add(new KeukenVm());
                     result[i].OrderId = orders[i].OrderId;
 
-                        var bestelling = orders[i].Producten;
+                        var bestelling = orders[i].BesteldeProducten;
                         result[i].Bestelling = bestelling
+                            .Where(x => x.Product.CategorieId == 1)
                             .GroupBy(g => new Tuple<string, int>(g.Product.ProductName, g.Hoeveelheid))
                             .Select(x => new BurgerMetAantallenDto()
                             {

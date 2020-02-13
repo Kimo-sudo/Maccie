@@ -22,7 +22,7 @@ namespace Application.Orders.Queries.Kassa
             public async Task<List<Order>> Handle(GetAllOrdersQuery request, CancellationToken cancellationToken)
             { 
                 return await _context.Bestellingen
-                    .Include(x => x.Producten)
+                    .Include(x => x.BesteldeProducten)
                     .ThenInclude(x => x.Product)
                     .Include(x => x.Employee)
                     .ToListAsync(cancellationToken);
